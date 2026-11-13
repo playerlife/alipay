@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PicLove — 在线图片工具箱</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e5315b'/%3E%3Cpath d='M16 24s-5.8-3.7-7.5-7.3C7.3 14.1 8.5 11.6 11.1 11.3c1.5-.2 2.9.6 3.6 1.7.7-1.1 2.1-1.9 3.6-1.7 2.6.3 3.8 2.8 2.6 5.4C21.8 20.3 16 24 16 24z' fill='%23fff'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand: #e5315b;
+      --brand-dark: #c41f47;
+      --brand-soft: #fff0f4;
+      --brand-glow: rgba(229, 49, 91, 0.18);
+      --ink: #1a1a2e;
+      --muted: #6b7280;
+      --line: #eceef2;
+      --surface: #ffffff;
+      --bg: #fafbfc;
+      --shadow: 0 8px 24px rgba(26, 26, 46, 0.06);
+      --shadow-hover: 0 16px 40px rgba(229, 49, 91, 0.12);
+      --radius: 12px;
+      --nav-h: 72px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(229, 49, 91, 0.08), transparent 55%),
+        radial-gradient(ellipse 40% 30% at 100% 20%, rgba(255, 180, 120, 0.12), transparent 50%),
+        radial-gradient(ellipse 35% 25% at 0% 40%, rgba(120, 180, 255, 0.08), transparent 45%),
+        var(--bg);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* —— Header —— */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: var(--nav-h);
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(236, 238, 242, 0.8);
+    }
+
+    .header__inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: Outfit, sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      flex-shrink: 0;
+    }
+
+    .logo__mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #ff6b8a, var(--brand));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 6px 16px var(--brand-glow);
+      animation: pulse-soft 3.2s ease-in-out infinite;
+    }
+
+    .logo__mark svg { width: 18px; height: 18px; fill: #fff; }
+
+    .logo span em {
+      font-style: normal;
+      color: var(--brand);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .nav__link {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--ink);
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav__link:hover {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .nav__link--dropdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav__link--dropdown svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.55;
+    }
+
+    .header__actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 10px 18px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .btn--ghost:hover { background: var(--line); }
+
+    .btn--primary {
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 8px 20px var(--brand-glow);
+    }
+
+    .btn--primary:hover {
+      background: var(--brand-dark);
+      box-shadow: 0 10px 28px rgba(229, 49, 91, 0.28);
+    }
+
+    .nav-toggle { position: absolute; opacity: 0; pointer-events: none; }
+
+    .menu-toggle {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--ink);
+      position: relative;
+    }
+
+    .menu-toggle span::before,
+    .menu-toggle span::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 18px;
+      height: 2px;
+      background: var(--ink);
+    }
+
+    .menu-toggle span::before { top: -6px; }
+    .menu-toggle span::after { top: 6px; }
+
+    /* —— Hero —— */
+    .hero {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 56px 24px 28px;
+      text-align: center;
+      animation: fade-up 0.7s ease both;
+    }
+
+    .hero__brand {
+      font-family: Outfit, sans-serif;
+      font-size: clamp(2.4rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .hero__brand em {
+      font-style: normal;
+      color: var(--brand);
+    }
+
+    .hero__title {
+      font-family: Outfit, sans-serif;
+      font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+
+    .hero__sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* —— Tools grid —— */
+    .tools {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 36px 24px 64px;
+    }
+
+    .tools__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .tool {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px 22px 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      animation: fade-up 0.6s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(229, 49, 91, 0.03));
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      pointer-events: none;
+    }
+
+    .tool:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(229, 49, 91, 0.25);
+    }
+
+    .tool:hover::after { opacity: 1; }
+
+    .tool__icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+      transition: transform 0.25s ease;
+    }
+
+    .tool:hover .tool__icon { transform: scale(1.08) rotate(-3deg); }
+
+    .tool__icon svg {
+      width: 30px;
+      height: 30px;
+      fill: currentColor;
+    }
+
+    .tool__name {
+      font-family: Outfit, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .tool__name span {
+      color: var(--brand);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.78em;
+      letter-spacing: 0.04em;
+      margin-left: 2px;
+    }
+
+    .tool__desc {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* icon colors */
+    .c-compress { background: linear-gradient(145deg, #ff7a59, #e5315b); }
+    .c-resize   { background: linear-gradient(145deg, #5b8def, #3b6fd9); }
+    .c-crop     { background: linear-gradient(145deg, #45c4a0, #2aa87e); }
+    .c-jpg      { background: linear-gradient(145deg, #f5b942, #e89a12); }
+    .c-fromjpg  { background: linear-gradient(145deg, #7b6cf0, #5a4bd6); }
+    .c-editor   { background: linear-gradient(145deg, #ff6b9d, #e5315b); }
+    .c-upscale  { background: linear-gradient(145deg, #3dd0e8, #1aafc7); }
+    .c-bg       { background: linear-gradient(145deg, #a78bfa, #7c5cf5); }
+    .c-water    { background: linear-gradient(145deg, #fb923c, #ea6b14); }
+    .c-meme     { background: linear-gradient(145deg, #f472b6, #db2777); }
+    .c-rotate   { background: linear-gradient(145deg, #34d399, #10b981); }
+    .c-html     { background: linear-gradient(145deg, #60a5fa, #2563eb); }
+
+    /* —— Banner —— */
+    .banner {
+      max-width: 1120px;
+      margin: 0 auto 72px;
+      padding: 0 24px;
+      animation: fade-up 0.7s 0.15s ease both;
+    }
+
+    .banner__inner {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+      align-items: center;
+      padding: 40px 44px;
+      border-radius: 20px;
+      background:
+        linear-gradient(120deg, rgba(229, 49, 91, 0.95), rgba(255, 107, 138, 0.9)),
+        radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.25), transparent 40%);
+      color: #fff;
+      box-shadow: 0 20px 50px rgba(229, 49, 91, 0.28);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner__inner::before {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -60px;
+      bottom: -80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .banner__copy h2 {
+      font-family: Outfit, sans-serif;
+      font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .banner__copy p {
+      opacity: 0.92;
+      font-size: 0.98rem;
+      max-width: 420px;
+      margin-bottom: 22px;
+    }
+
+    .btn--light {
+      background: #fff;
+      color: var(--brand);
+    }
+
+    .btn--light:hover {
+      background: #fff5f7;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .banner__visual {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .preview-stack {
+      width: 220px;
+      height: 160px;
+      position: relative;
+    }
+
+    .preview-stack__card {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(6px);
+      display: grid;
+      place-items: center;
+      font-family: Outfit, sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .preview-stack__card:nth-child(1) {
+      transform: rotate(-8deg) translate(-12px, 8px);
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .preview-stack__card:nth-child(2) {
+      transform: rotate(6deg) translate(14px, -4px);
+      animation: float 5s 0.6s ease-in-out infinite reverse;
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* —— Footer —— */
+    .footer {
+      border-top: 1px solid var(--line);
+      background: #fff;
+      padding: 36px 24px 28px;
+    }
+
+    .footer__inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 32px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+    }
+
+    .footer__links a {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .footer__links a:hover { color: var(--brand); }
+
+    .footer__copy {
+      font-size: 0.82rem;
+      color: #9ca3af;
+    }
+
+    /* —— Mobile drawer —— */
+    .drawer {
+      position: fixed;
+      inset: var(--nav-h) 0 0 0;
+      z-index: 60;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+
+    .drawer__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(26, 26, 46, 0.35);
+      cursor: pointer;
+    }
+
+    .nav-toggle:checked ~ .drawer {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .drawer__panel {
+      position: relative;
+      background: #fff;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: var(--shadow);
+      transform: translateY(-8px);
+      transition: transform 0.22s ease;
+    }
+
+    .nav-toggle:checked ~ .drawer .drawer__panel { transform: translateY(0); }
+
+    .drawer__panel a {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .drawer__panel a:hover {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    @media (min-width: 721px) {
+      .nav-toggle:checked ~ .drawer { display: none; }
+    }
+
+    /* —— Animations —— */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse-soft {
+      0%, 100% { box-shadow: 0 6px 16px var(--brand-glow); }
+      50% { box-shadow: 0 8px 24px rgba(229, 49, 91, 0.32); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .tools__grid .tool:nth-child(1)  { animation-delay: 0.05s; }
+    .tools__grid .tool:nth-child(2)  { animation-delay: 0.08s; }
+    .tools__grid .tool:nth-child(3)  { animation-delay: 0.11s; }
+    .tools__grid .tool:nth-child(4)  { animation-delay: 0.14s; }
+    .tools__grid .tool:nth-child(5)  { animation-delay: 0.17s; }
+    .tools__grid .tool:nth-child(6)  { animation-delay: 0.20s; }
+    .tools__grid .tool:nth-child(7)  { animation-delay: 0.23s; }
+    .tools__grid .tool:nth-child(8)  { animation-delay: 0.26s; }
+    .tools__grid .tool:nth-child(9)  { animation-delay: 0.29s; }
+    .tools__grid .tool:nth-child(10) { animation-delay: 0.32s; }
+    .tools__grid .tool:nth-child(11) { animation-delay: 0.35s; }
+    .tools__grid .tool:nth-child(12) { animation-delay: 0.38s; }
+
+    /* —— Responsive —— */
+    @media (max-width: 980px) {
+      .tools__grid { grid-template-columns: repeat(3, 1fr); }
+      .banner__inner { grid-template-columns: 1fr; text-align: center; }
+      .banner__copy p { margin-left: auto; margin-right: auto; }
+      .banner__visual { display: none; }
+    }
+
+    @media (max-width: 720px) {
+      .nav { display: none; }
+      .header__actions .btn--ghost { display: none; }
+      .menu-toggle { display: inline-flex; }
+      .tools__grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .tool { padding: 22px 14px 18px; }
+      .hero { padding-top: 36px; }
+      .banner__inner { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle" hidden />
+
+  <header class="header">
+    <div class="header__inner">
+      <a class="logo" href="#" aria-label="PicLove 首页">
+        <span class="logo__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.6-9.4-9.1C1.1 8.6 2.7 5.5 6 5.1c1.9-.2 3.6.7 4.5 2.1.9-1.4 2.6-2.3 4.5-2.1 3.3.4 4.9 3.5 3.4 6.8C19.2 16.4 12 21 12 21z"/></svg>
+        </span>
+        <span>Pic<em>Love</em></span>
+      </a>
+
+      <nav class="nav" aria-label="主导航">
+        <a class="nav__link nav__link--dropdown" href="#tools">
+          图片工具
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z"/></svg>
+        </a>
+        <a class="nav__link" href="#banner">桌面端</a>
+        <a class="nav__link" href="#">手机端</a>
+        <a class="nav__link" href="#">帮助</a>
+      </nav>
+
+      <div class="header__actions">
+        <button class="btn btn--ghost" type="button">登录</button>
+        <button class="btn btn--primary" type="button">免费注册</button>
+        <label class="menu-toggle" for="nav-toggle" aria-label="打开菜单">
+          <span></span>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <div class="drawer" id="drawer">
+    <label class="drawer__backdrop" for="nav-toggle" aria-label="关闭菜单"></label>
+    <div class="drawer__panel">
+      <a href="#tools" onclick="document.getElementById('nav-toggle').checked=false">图片工具</a>
+      <a href="#banner" onclick="document.getElementById('nav-toggle').checked=false">桌面端</a>
+      <a href="#" onclick="document.getElementById('nav-toggle').checked=false">手机端</a>
+      <a href="#" onclick="document.getElementById('nav-toggle').checked=false">帮助</a>
+      <a href="#" onclick="document.getElementById('nav-toggle').checked=false">登录</a>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero">
+      <h1 class="hero__brand">Pic<em>Love</em></h1>
+      <p class="hero__title">批量编辑图片，你需要的工具都在这里</p>
+      <p class="hero__sub">在线图片编辑器，永远免费使用 — 压缩、裁剪、转换、去背景，一键搞定。</p>
+    </section>
+
+    <section class="tools" id="tools">
+      <div class="tools__grid">
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-compress">
+            <svg viewBox="0 0 24 24"><path d="M4 4h7v2H6v5H4V4zm9 0h7v7h-2V6h-5V4zM4 13h2v5h5v2H4v-7zm14 0h2v7h-7v-2h5v-5z"/></svg>
+          </div>
+          <h3 class="tool__name">压缩 <span>IMAGE</span></h3>
+          <p class="tool__desc">压缩 JPG、PNG、SVG 与 GIF，减小体积的同时尽量保持画质。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-resize">
+            <svg viewBox="0 0 24 24"><path d="M3 3h8v2H5v6H3V3zm10 0h8v8h-2V5h-6V3zM3 13h2v6h6v2H3v-8zm16 0h2v8h-8v-2h6v-6z"/></svg>
+          </div>
+          <h3 class="tool__name">调整大小 <span>IMAGE</span></h3>
+          <p class="tool__desc">按百分比或像素定义尺寸，批量调整 JPG、PNG、SVG、GIF。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-crop">
+            <svg viewBox="0 0 24 24"><path d="M17 5V1h-2v4H7a2 2 0 0 0-2 2v8H1v2h4v4h2v-4h8a2 2 0 0 0 2-2V7h4V5h-4zm0 10H7V7h10v8z"/></svg>
+          </div>
+          <h3 class="tool__name">裁剪 <span>IMAGE</span></h3>
+          <p class="tool__desc">轻松裁剪 JPG、PNG 或 GIF；可用像素或可视化编辑器定位。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-jpg">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm1 7V3.5L19.5 9H15zM8 13l2.5 3.2L13 13l3 4H8l0-4z"/></svg>
+          </div>
+          <h3 class="tool__name">转换为 <span>JPG</span></h3>
+          <p class="tool__desc">将 PNG、GIF、TIF、WEBP、HEIC 等格式批量转为 JPG。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-fromjpg">
+            <svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm9 1.5V8h3.5L14 4.5zM8 12h8v2H8v-2zm0 4h6v2H8v-2z"/></svg>
+          </div>
+          <h3 class="tool__name">从 JPG <span>转换</span></h3>
+          <p class="tool__desc">将 JPG 转为 PNG、GIF；也可多张 JPG 合成动态 GIF。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-editor">
+            <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          </div>
+          <h3 class="tool__name">图片编辑器</h3>
+          <p class="tool__desc">添加文字、特效、边框与贴纸，简单几步点亮你的照片。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-upscale">
+            <svg viewBox="0 0 24 24"><path d="M4 20h6v-2H6v-4H4v6zm10 0h6v-6h-2v4h-4v2zM4 4v6h2V6h4V4H4zm16 0h-6v2h4v4h2V4z"/></svg>
+          </div>
+          <h3 class="tool__name">放大图像</h3>
+          <p class="tool__desc">高分辨率放大 JPG、PNG，提升尺寸同时尽量保持清晰度。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-bg">
+            <svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm7 4a4 4 0 1 0 .001 8.001A4 4 0 0 0 12 7zm-7 12h14v-1.2c-1.6-1.5-4.9-2.3-7-2.3s-5.4.8-7 2.3V19z"/></svg>
+          </div>
+          <h3 class="tool__name">去除背景</h3>
+          <p class="tool__desc">高精度自动识别主体，一键抠图、去除背景。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-water">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8 7 5 10.2 5 13.5A7 7 0 0 0 19 13.5C19 10.2 16 7 12 2zm0 16a4.5 4.5 0 0 1-4.5-4.5c0-1.7 1.4-3.8 4.5-8 3.1 4.2 4.5 6.3 4.5 8A4.5 4.5 0 0 1 12 18z"/></svg>
+          </div>
+          <h3 class="tool__name">水印 <span>IMAGE</span></h3>
+          <p class="tool__desc">为图片添加文字或图片水印，自定义字体、透明度与位置。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-meme">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm-4.2 7.5a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6zm8.4 0a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6zM7.5 15.2c1.2 1.5 2.7 2.3 4.5 2.3s3.3-.8 4.5-2.3l-1.5-1.1c-.9 1.1-1.9 1.6-3 1.6s-2.1-.5-3-1.6l-1.5 1.1z"/></svg>
+          </div>
+          <h3 class="tool__name">Meme 生成器</h3>
+          <p class="tool__desc">在线制作表情包：给模板加字幕，或上传自己的图片。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-rotate">
+            <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.3 0 6 2.7 6 6a6 6 0 0 1-9.3 5 1 1 0 1 0-1.3 1.5A8 8 0 0 0 20 13c0-4.4-3.6-8-8-8z"/></svg>
+          </div>
+          <h3 class="tool__name">旋转 <span>IMAGE</span></h3>
+          <p class="tool__desc">同时旋转多张 JPG、PNG 或 GIF，可仅处理横图或竖图。</p>
+        </article>
+
+        <article class="tool" tabindex="0">
+          <div class="tool__icon c-html">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16v4H4V4zm0 6h10v4H4v-4zm0 6h16v4H4v-4zm12-6h4v4h-4v-4z"/></svg>
+          </div>
+          <h3 class="tool__name">HTML 转图片</h3>
+          <p class="tool__desc">粘贴网页 URL，一键将页面转换为 JPG 或 SVG 图片。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="banner" id="banner">
+      <div class="banner__inner">
+        <div class="banner__copy">
+          <h2>按你的方式处理图片</h2>
+          <p>需要处理 PDF？试试配套工具。手机端随时扫描纸质文件，并快速调用常用图片工具。</p>
+          <button class="btn btn--light" type="button">了解桌面与移动端</button>
+        </div>
+        <div class="banner__visual" aria-hidden="true">
+          <div class="preview-stack">
+            <div class="preview-stack__card">JPG → PNG</div>
+            <div class="preview-stack__card">一键压缩</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <a class="logo" href="#">
+        <span class="logo__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7.2-4.6-9.4-9.1C1.1 8.6 2.7 5.5 6 5.1c1.9-.2 3.6.7 4.5 2.1.9-1.4 2.6-2.3 4.5-2.1 3.3.4 4.9 3.5 3.4 6.8C19.2 16.4 12 21 12 21z"/></svg>
+        </span>
+        <span>Pic<em>Love</em></span>
+      </a>
+      <div class="footer__links">
+        <a href="#">隐私政策</a>
+        <a href="#">使用条款</a>
+        <a href="#">联系我们</a>
+        <a href="#">API</a>
+      </div>
+      <p class="footer__copy">© 2026 PicLove — 演示 UI，风格灵感来自 iLoveIMG</p>
+    </div>
+  </footer>
+
+  <script>
+    const navToggle = document.getElementById("nav-toggle");
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 720) navToggle.checked = false;
+    });
+
+    navToggle.addEventListener("change", () => {
+      document.body.style.overflow = navToggle.checked ? "hidden" : "";
+    });
+
+    document.querySelectorAll(".tool").forEach((card) => {
+      card.addEventListener("click", () => {
+        card.animate(
+          [
+            { transform: "scale(1)" },
+            { transform: "scale(0.97)" },
+            { transform: "translateY(-6px) scale(1)" },
+          ],
+          { duration: 220, easing: "ease-out" }
+        );
+      });
+    });
+  </script>
+</body>
+</html>
